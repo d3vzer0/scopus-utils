@@ -1,5 +1,5 @@
-from utils.attck import MitreAttck
-from utils.neograph.crud import (CRUDActor, CRUDTechnique,
+from cli.utils.attck import MitreAttck
+from cli.utils.neograph.crud import (CRUDActor, CRUDTechnique,
     CRUDMalware, CRUDData, CRUDAction, CRUDRelation, CRUDTool)
 import typer
 import asyncio
