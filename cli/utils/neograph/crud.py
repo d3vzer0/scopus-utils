@@ -2,7 +2,6 @@ from cli.utils.neograph.nodes import Actor, Technique, Tool, Malware, Data, Acti
 from neomodel import db
 from neomodel import config
 from neomodel import install_all_labels
-
 import os
 
 config.DATABASE_URL = os.environ["NEO4J_BOLT_URL"]

@@ -6,7 +6,7 @@ class Technique(StructuredNode):
     uid = UniqueIdProperty()
     cti_id = StringProperty(unique=True, unique_index=True, required=True)
     technique = StringProperty(unique_index=True)
-    name = StringProperty(unique_index=True, required=True)
+    name = StringProperty(required=True)
     aliases = ArrayProperty(StringProperty())
     platforms = ArrayProperty(StringProperty())
     description = StringProperty()
@@ -21,7 +21,7 @@ class Technique(StructuredNode):
 class Data(StructuredNode):
     uid = UniqueIdProperty()
     cti_id = StringProperty(unique=True, unique_index=True, required=True)
-    name = StringProperty(unique_index=True, required=True)
+    name = StringProperty(required=True)
     description = StringProperty()
     techniques = RelationshipTo('Technique', 'covers')
 
@@ -29,7 +29,7 @@ class Data(StructuredNode):
 class Actor(StructuredNode):
     uid = UniqueIdProperty()
     cti_id = StringProperty(unique=True, unique_index=True, required=True)
-    name = StringProperty(unique_index=True, required=True)
+    name = StringProperty(required=True)
     aliases = ArrayProperty(StringProperty())
     description = StringProperty()
     references = ArrayProperty(JSONProperty())
@@ -52,7 +52,7 @@ class Malware(StructuredNode):
     cti_id = StringProperty(unique=True, unique_index=True, required=True)
     platforms = ArrayProperty(StringProperty())
     aliases = ArrayProperty(StringProperty())
-    name = StringProperty(unique_index=True, required=True)
+    name = StringProperty(required=True)
     description = StringProperty()
     references = ArrayProperty(JSONProperty())
     techniques = RelationshipTo('Technique', 'uses')
@@ -63,7 +63,7 @@ class Tool(StructuredNode):
     cti_id = StringProperty(unique=True, unique_index=True, required=True)
     platforms = ArrayProperty(StringProperty())
     aliases = ArrayProperty(StringProperty())
-    name = StringProperty(unique_index=True, required=True)
+    name = StringProperty(required=True)
     description = StringProperty()
     references = ArrayProperty(JSONProperty())
     techniques = RelationshipTo('Technique', 'uses')
@@ -72,7 +72,7 @@ class Tool(StructuredNode):
 class Detection(StructuredNode):
     uid = UniqueIdProperty()
     external_id = StringProperty(unique=True, unique_index=True, required=True)
-    title = StringProperty(unique_index=True, required=True)
+    title = StringProperty(required=True)
     platform = StringProperty(required=True)
     description = StringProperty()
     content = StringProperty(required=True)
