@@ -1,13 +1,11 @@
-# from utils.products import import_products
-# from utils.sentinel import import_sentinel
-# from utils.sigma import import_sigma
 import cli.attck as attck
+import cli.sigma as sigma
 import typer
-import asyncio
 
 app = typer.Typer()
 
 app.add_typer(attck.app, name="attck")
+app.add_typer(sigma.app, name="sigma")
 
 if __name__ == "__main__":
     app()

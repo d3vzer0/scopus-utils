@@ -65,7 +65,10 @@ def relationships(cti_url: str = typer.Option('https://raw.githubusercontent.com
     mitre_attck = asyncio.run(MitreAttck.from_cti(cti_url))
     typer.echo(f'Started import of ATTCK CTI relationships')
     for relation in mitre_attck.relationships:
-        CRUDRelation().create(relation)
+        try:
+            CRUDRelation().create(relation)
+        except Exception as err:
+            print(err)
     typer.echo(f'Finished import of ATTCK CTI relationships')
 
 

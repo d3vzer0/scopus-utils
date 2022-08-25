@@ -1,9 +1,12 @@
-from utils.neograph.nodes import Actor, Technique, Tool, Malware, Data, Action
+from cli.utils.neograph.nodes import Actor, Technique, Tool, Malware, Data, Action, Detection
 from neomodel import db
 from neomodel import config
+from neomodel import install_all_labels
+
 import os
 
 config.DATABASE_URL = os.environ["NEO4J_BOLT_URL"]
+install_all_labels()
 
 class CRUDActor:
     def __init__(self, cti_id: str = None):
@@ -57,6 +60,19 @@ class CRUDData():
     def create(self, data):
         data = Data(**data)
         data.save()
+
+
+class CRUDDetection():
+    def __init__(self, external_id: str = None):
+        self.external_id = external_id
+
+    def create(self, detection):
+        detection_node = Detection(**detection)
+        detection_node.save()
+        for technique in detection['techniques']:
+            detection_node = Detection.nodes.get(external_id=detection['external_id'])
+            technique_node = Technique.nodes.get(technique=technique)
+            detection_node.techniques.connect(technique_node)
 
 
 class CRUDRelation:

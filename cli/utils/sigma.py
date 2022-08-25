@@ -6,7 +6,7 @@ import asyncio
 import copy
 import re
 
-TECHNIQUE_PATTERN = 't\d{4}(\.\d{2})?'
+TECHNIQUE_PATTERN = 't\d{4}(\.\d{3})?'
 
 # Thanks fo Srisaila for this nested merge sample (https://stackoverflow.com/a/47564936)
 # this example doesn't override nested dictionaries, which is the default behaviour of the
@@ -25,7 +25,6 @@ def merge_dicts(default, override):
 class Sigma:
     def __init__(self, config_files = None):
         self.config_files = config_files if config_files else []
-
 
     @staticmethod
     def find_technique(content):
@@ -85,11 +84,10 @@ class Sigma:
 async def import_sigma(*args, **kwargs):
     ''' Load all config files and import mapped techniques '''
     sigma = Sigma.from_path(kwargs['path'])
-    async with ReternalAPI(kwargs['api_url']) as reternal:
-        for rule in sigma.rules:
-            await reternal.save('/rules/sigma', rule)
-
+    for rule in sigma.rules:
+        print(rule)
+     
 
 if __name__ == "__main__":
-    asyncio.run(import_sigma())
+    asyncio.run(import_sigma(path='rules/sigma'))
 

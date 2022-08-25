@@ -6,8 +6,8 @@ import cli.attck as attck
 import typer
 import asyncio
 
-# @app.command()
-# def sentinel(api_url: str, path: str = typer.Option('../Azure-Sentinel/Detections')):
-#     typer.echo(f'Started import of Sentinel rules')
-#     asyncio.run(import_sentinel(api_url=api_url, path=path))
-#     typer.echo(f'Finished import of Sentinel rules')
+@app.command()
+def sentinel(path: str = typer.Option('../detections/sentinel')):
+    typer.echo(f'Started import of Sentinel rules')
+    asyncio.run(import_sentinel(api_url=api_url, path=path))
+    typer.echo(f'Finished import of Sentinel rules')

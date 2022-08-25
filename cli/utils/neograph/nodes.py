@@ -3,8 +3,9 @@ from neomodel import (config, StructuredNode, StringProperty, IntegerProperty,
 
 
 class Technique(StructuredNode):
-    cti_id = UniqueIdProperty()
-    technique = StringProperty()
+    uid = UniqueIdProperty()
+    cti_id = StringProperty(unique=True, unique_index=True, required=True)
+    technique = StringProperty(unique_index=True)
     name = StringProperty(unique_index=True, required=True)
     aliases = ArrayProperty(StringProperty())
     platforms = ArrayProperty(StringProperty())
@@ -18,14 +19,16 @@ class Technique(StructuredNode):
 
 
 class Data(StructuredNode):
-    cti_id = UniqueIdProperty()
+    uid = UniqueIdProperty()
+    cti_id = StringProperty(unique=True, unique_index=True, required=True)
     name = StringProperty(unique_index=True, required=True)
     description = StringProperty()
-    techniques = RelationshipTo('Technique', 'detects')
+    techniques = RelationshipTo('Technique', 'covers')
 
 
 class Actor(StructuredNode):
-    cti_id = UniqueIdProperty()
+    uid = UniqueIdProperty()
+    cti_id = StringProperty(unique=True, unique_index=True, required=True)
     name = StringProperty(unique_index=True, required=True)
     aliases = ArrayProperty(StringProperty())
     description = StringProperty()
@@ -36,7 +39,8 @@ class Actor(StructuredNode):
 
 
 class Action(StructuredNode):
-    cti_id = UniqueIdProperty()
+    uid = UniqueIdProperty()
+    cti_id = StringProperty(unique=True, unique_index=True, required=True)
     name = StringProperty(unique_index=True, required=True)
     description = StringProperty()
     references = ArrayProperty(JSONProperty())
@@ -44,7 +48,8 @@ class Action(StructuredNode):
 
 
 class Malware(StructuredNode):
-    cti_id = UniqueIdProperty()
+    uid = UniqueIdProperty()
+    cti_id = StringProperty(unique=True, unique_index=True, required=True)
     platforms = ArrayProperty(StringProperty())
     aliases = ArrayProperty(StringProperty())
     name = StringProperty(unique_index=True, required=True)
@@ -54,10 +59,23 @@ class Malware(StructuredNode):
 
 
 class Tool(StructuredNode):
-    cti_id = UniqueIdProperty()
+    uid = UniqueIdProperty()
+    cti_id = StringProperty(unique=True, unique_index=True, required=True)
     platforms = ArrayProperty(StringProperty())
     aliases = ArrayProperty(StringProperty())
     name = StringProperty(unique_index=True, required=True)
     description = StringProperty()
     references = ArrayProperty(JSONProperty())
     techniques = RelationshipTo('Technique', 'uses')
+
+
+class Detection(StructuredNode):
+    uid = UniqueIdProperty()
+    external_id = StringProperty(unique=True, unique_index=True, required=True)
+    title = StringProperty(unique_index=True, required=True)
+    platform = StringProperty(required=True)
+    description = StringProperty()
+    content = StringProperty(required=True)
+    categories = ArrayProperty(StringProperty())
+    tags = ArrayProperty(StringProperty())
+    techniques = RelationshipTo('Technique', 'detects')
