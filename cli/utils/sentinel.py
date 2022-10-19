@@ -1,8 +1,25 @@
 
 from .reternalapi import ReternalAPI
+from pydantic import BaseModel, Field, validator
 import glob
 import yaml
 import asyncio
+
+
+class SentinelDetection(BaseModel):
+    external_id: str = Field(..., alias='id')
+    title: str = Field(..., alias='name')
+    description: str 
+    content: dict
+    platform: str = 'sentinel'
+    techniques: list = Field(default=None, alias='relevantTechniques') 
+    datatypes: list = Field(default=None, alias='requiredDataConnectors')
+
+    @validator('datatypes', pre=True, always=True)
+    def set_datatypes(cls, v):
+        if v:
+            datatypes = [datatype for connector in v if 'dataTypes' in connector for datatype in connector['dataTypes']]
+            return datatypes
 
 
 class Sentinel:
@@ -10,29 +27,11 @@ class Sentinel:
         self.config_files = config_files if config_files else []
 
     @property
-    def rules(self):
+    def detections(self):
         for config in self.config_files:
             with open(config) as yamlfile:
                 yaml_object = yaml.load(yamlfile, Loader=yaml.FullLoader)
-                rule_data = {
-                    'external_id': yaml_object['id'],
-                    'title': yaml_object['name'],
-                    'description': yaml_object['description'],
-                    'content': yaml_object,
-                    'platform': 'sentinel',
-                    'datasources': []
-                }
-                
-                if 'relevantTechniques' in yaml_object and yaml_object['relevantTechniques']:
-                    rule_data['techniques'] = yaml_object['relevantTechniques']
-
-                if 'requiredDataConnectors' in yaml_object:
-                    for connector in yaml_object['requiredDataConnectors']:
-                        for datatype in connector['dataTypes']:
-                            rule_data['datasources'].append(datatype)
-
-                
-                yield rule_data
+                yield SentinelDetection(**yaml_object, content=yaml_object)
 
 
     @classmethod

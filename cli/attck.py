@@ -14,7 +14,7 @@ def actors(cti_url: str = typer.Option('https://raw.githubusercontent.com/mitre/
     typer.echo(f'Started import of ATTCK CTI actors')
     for actor in mitre_attck.actors:
         try:
-            CRUDActor().create(actor.actor)
+            CRUDActor().create(actor.dict())
         except neomodel.exceptions.UniqueProperty as exc:
             pass
     typer.echo(f'Finished import of ATTCK CTI actors')
@@ -26,7 +26,7 @@ def actions(cti_url: str = typer.Option('https://raw.githubusercontent.com/mitre
     typer.echo(f'Started import of ATTCK CTI actions')
     for action in mitre_attck.actions:
         try:
-            CRUDAction().create(action.action)
+            CRUDAction().create(action.dict())
         except neomodel.exceptions.UniqueProperty as exc:
             pass
     typer.echo(f'Finished import of ATTCK CTI actions')
@@ -38,7 +38,7 @@ def techniques(cti_url: str = typer.Option('https://raw.githubusercontent.com/mi
     typer.echo(f'Started import of ATTCK CTI techniques')
     for technique in mitre_attck.techniques:
         try:
-            CRUDTechnique().create(technique.technique)
+            CRUDTechnique().create(technique.dict())
         except neomodel.exceptions.UniqueProperty as exc:
             pass
     typer.echo(f'Finished import of ATTCK CTI techniques')
@@ -50,7 +50,7 @@ def tools(cti_url: str = typer.Option('https://raw.githubusercontent.com/mitre/c
     typer.echo(f'Started import of ATTCK CTI tools')
     for tool in mitre_attck.tools:
         try:
-            CRUDTool().create(tool.tool)
+            CRUDTool().create(tool.dict())
         except neomodel.exceptions.UniqueProperty as exc:
             pass
     typer.echo(f'Finished import of ATTCK CTI tools')
@@ -62,7 +62,7 @@ def malware(cti_url: str = typer.Option('https://raw.githubusercontent.com/mitre
     typer.echo(f'Started import of ATTCK CTI malware')
     for malware in mitre_attck.malware:
         try:
-            CRUDMalware().create(malware.malware)
+            CRUDMalware().create(malware.dict())
         except neomodel.exceptions.UniqueProperty as exc:
             pass
     typer.echo(f'Finished import of ATTCK CTI malware')
@@ -74,22 +74,24 @@ def datasources(cti_url: str = typer.Option('https://raw.githubusercontent.com/m
     typer.echo(f'Started import of ATTCK CTI datasources')
     for data in mitre_attck.data:
         try:
-            CRUDData().create(data.data)
+            CRUDData().create(data.dict())
         except neomodel.exceptions.UniqueProperty as exc:
             pass
     typer.echo(f'Finished import of ATTCK CTI datasources')
 
 
 @app.command()
-def relationships(cti_url: str = typer.Option('https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json'), cti_data = None):
+def relationships(cti_url: str = typer.Option('https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json'), cti_data = None, cache = None):
     mitre_attck = cti_data if cti_data else asyncio.run(MitreAttck.from_cti(cti_url))
     typer.echo(f'Started import of ATTCK CTI relationships')
+    all_nodes = CRUDActor().get_all() + CRUDMalware().get_all() + CRUDTechnique().get_all() + CRUDAction().get_all() + CRUDTool().get_all()
+    cache = {x.cti_id: x for x in all_nodes}
     for relation in mitre_attck.relationships:
         try:
-            CRUDRelation().create(relation)
+            CRUDRelation().create(relation.dict(), cache=cache)
         except Exception as err:
-            print(relation)
             print(err)
+            pass
     typer.echo(f'Finished import of ATTCK CTI relationships')
 
 

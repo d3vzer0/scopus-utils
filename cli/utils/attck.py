@@ -1,172 +1,114 @@
 import json
+from typing import Optional
 import aiohttp
-import asyncio
-import neomodel
+from pydantic import BaseModel, Field
 
-class Technique:
-    def __init__(self, technique):
-        self.technique = technique
-
-    @classmethod
-    def from_cti(cls, technique):
-        ''' Format technique to match expected API schema '''
-        technique = { 
-            'cti_id': technique['id'],
-            'name':technique['name'],
-            'technique': technique['external_references'][0]['external_id'],
-            'description': technique['description'],
-            'platforms': [platform for platform in technique['x_mitre_platforms']], 
-            'permissions_required': [permission for permission in technique.get('x_mitre_permissions_required', [])],
-            'data_sources': [datasource for datasource in technique.get('x_mitre_data_sources', [])],
-            'references': technique['external_references'],
-            'kill_chain_phases': [phase['phase_name'] for phase in technique['kill_chain_phases']],
-            'is_subtechnique': technique.get('x_mitre_is_subtechnique', False),
-        }
-        return cls(technique)
-
-    def set_magma(self, magma_mapping):
-        external_id = self.technique['external_references'][0]['external_id']
-        if external_id in self.magma_mapping:
-            mapped_usecase = self.magma_mapping[external_id]
-            mapped_usecase.pop('external_id')
-            self.technique['magma'] = mapped_usecase
+class Malware(BaseModel):
+    cti_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    platforms: list[str] = Field(default=None, alias='x_mitre_platforms')
+    aliases: list[str] = Field(default=None, alias='x_mitre_aliases')
+    references: list[dict] = Field(..., alias='external_references')
+    revoked: bool = False
+    description: str 
 
 
-
-class Malware:
-    def __init__(self, malware):
-        self.malware = malware
-
-    @classmethod
-    def from_cti(cls, malware):
-        malware = {
-            'cti_id': malware['id'],
-            'name': malware['name'],
-            'platforms': malware.get('x_mitre_platforms'),
-            'aliases': malware.get('x_mitre_aliases'),
-            'references': malware['external_references'],
-            'description': malware['description']
-        }
-        return cls(malware)
+class Technique(BaseModel):
+    cti_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    platforms: list[str] = Field(default=None, alias='x_mitre_platforms')
+    aliases: list[str] = Field(default=None, alias='x_mitre_aliases')
+    references: list[dict] = Field(..., alias='external_references')
+    permissions_required: list[dict] = Field(default=None, alias='external_references')
+    data_sources: list[dict] = Field(default=None, alias='external_references')
+    kill_chain_phases: list[dict] = Field(..., alias='kill_chain_phases')
+    description: str
+    revoked: bool = False
+    is_subtechnique: bool = Field(default=False, alias='x_mitre_is_subtechnique')
 
 
-class Tool:
-    def __init__(self, tool):
-        self.tool = tool
+# class Technique:
+#     def __init__(self, technique):
+#         self.technique = technique
 
-    @classmethod
-    def from_cti(cls, tool):
-        tool = {
-            'cti_id': tool['id'],
-            'name': tool['name'],
-            'platforms': tool.get('x_mitre_platforms'),
-            'aliases': tool.get('x_mitre_aliases'),
-            'references': tool['external_references'],
-            'description': tool['description']
-        }
-        return cls(tool)
+#     @classmethod
+#     def from_cti(cls, technique):
+#         ''' Format technique to match expected API schema '''
+#         technique = { 
+#             'cti_id': technique['id'],
+#             'name':technique['name'],
+#             'technique': technique['external_references'][0]['external_id'],
+#             'description': technique['description'],
+#             'platforms': [platform for platform in technique['x_mitre_platforms']], 
+#             'permissions_required': [permission for permission in technique.get('x_mitre_permissions_required', [])],
+#             'data_sources': [datasource for datasource in technique.get('x_mitre_data_sources', [])],
+#             'references': technique['external_references'],
+#             'kill_chain_phases': [phase['phase_name'] for phase in technique['kill_chain_phases']],
+#             'is_subtechnique': technique.get('x_mitre_is_subtechnique', False),
+#         }
+#         return cls(technique)
 
-class Action:
-    def __init__(self, action):
-        self.action = action
+#     def set_magma(self, magma_mapping):
+#         external_id = self.technique['external_references'][0]['external_id']
+#         if external_id in self.magma_mapping:
+#             mapped_usecase = self.magma_mapping[external_id]
+#             mapped_usecase.pop('external_id')
+#             self.technique['magma'] = mapped_usecase
 
-    @classmethod
-    def from_cti(cls, action):
-        action = {
-            'cti_id': action['id'], 
-            'name': action['name'],
-            'references': action['external_references'],
-            'description': action['description']
-        }
-        return cls(action)
-
-class Data:
-    def __init__(self, data):
-        self.data = data
-
-    @classmethod
-    def from_cti(cls, data):
-        data = {
-            'cti_id': data['id'], 
-            'name': data['name'],
-            'description': data['description']
-        }
-        return cls(data)
-
-class Actor:
-    def __init__(self, actor):
-        self.actor = actor
-
-    @classmethod
-    def from_cti(cls, actor):
-        actor = {
-            'cti_id': actor['id'], 
-            'name': actor['name'],
-            'references': actor['external_references'],
-            'aliases': [alias for alias in \
-                actor.get('aliases', [])],
-            'description': actor.get('description', None),
-        }
-        return cls(actor)
+class Tool(BaseModel):
+    cti_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    platforms: list[str] = Field(default=None, alias='x_mitre_platforms')
+    aliases: list[str] = Field(default=None, alias='x_mitre_aliases')
+    references: list[dict] = Field(..., alias='external_references')
+    revoked: bool = False
+    description: str 
 
 
-class Relationship:
-    def __init__(self, relationship):
-        self.relationship = relationship
+class Action(BaseModel):
+    cti_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    references: list[dict] = Field(..., alias='external_references')
+    revoked: bool = False
+    description: str 
 
-    @classmethod
-    def from_cti(cls, relationship):
-        relationship = {
-            'source_ref': relationship['source_ref'], 
-            'target_ref': relationship['target_ref'],
-        }
-        return cls(relationship)
+
+class Data(BaseModel):
+    cti_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    description: str 
+    revoked: bool = False
+
+
+class Actor(BaseModel):
+    cti_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    description: str = None
+    references: list[dict] = Field(..., alias='external_references')
+    aliases: list[str] = Field(default=None, alias='x_mitre_aliases')
+    revoked: bool = False
+
+
+class Relationship(BaseModel):
+    source_ref: str
+    target_ref: str
+    relationship_type: str 
+
 
 class MitreAttck:
-    def __init__(self, cti_objects = None):
-        self.cti_objects = cti_objects
+    def __init__(self, actors: list[Actor] = None, techniques: list[Technique] = None,
+        data: list[Data] = None, tools: list[Tool] = None, actions: list[Action] = None,
+        malware: list[Malware] = None, relationships: list[Relationship] = None):
+    
+        # self.cti_objects = cti_objects
+        self.actors = actors
+        self.techniques = techniques
+        self.actions = actions
+        self.data = data
+        self.tools = tools
+        self.malware = malware
+        self.relationships = relationships
  
-    @property 
-    def data(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'x-mitre-data-component':
-                yield Data.from_cti(entry)
-
-    @property
-    def actions(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'course-of-action':
-                yield Action.from_cti(entry)
-
-    @property
-    def tools(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'tool':
-                yield Tool.from_cti(entry)
-
-    @property
-    def malware(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'malware':
-                yield Malware.from_cti(entry)
-
-    @property
-    def actors(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'intrusion-set':
-                    yield Actor.from_cti(entry)
-    @property
-    def techniques(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'attack-pattern':
-                yield Technique.from_cti(entry)
-
-    @property
-    def relationships(self):
-        for entry in self.cti_objects:
-            if entry['type'] == 'relationship':
-                yield entry
-
 
     @classmethod
     async def from_cti(cls, cti_url='https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json'):
@@ -176,10 +118,29 @@ class MitreAttck:
             async with session.get(cti_url) as resp:
                 get_entries = await resp.text()
 
-        cti_objects = []
+        mapped_objects = {
+            'relationship': { 'objects': [], 'type': Relationship },
+            'attack-pattern': { 'objects': [], 'type': Technique },
+            'intrusion-set': { 'objects': [], 'type': Actor, },
+            'malware': { 'objects': [], 'type': Malware },
+            'tool': { 'objects': [], 'type': Tool },
+            'actions': { 'objects': [], 'type': Action },
+            'x-mitre-data-component': { 'objects': [], 'type': Data }
+        }
+
         for entry in json.loads(get_entries)['objects']:
-            if entry.get('revoked', False) == False:
-                cti_objects.append(entry)
+            # if entry.get('revoked', False) == False and 
+            if entry['type'] in mapped_objects:
+                mapped_entry = mapped_objects[entry['type']]
+                mapped_entry['objects'].append(mapped_entry['type'](**entry))
    
-        return cls(cti_objects=cti_objects)
+        return cls(
+            malware=mapped_objects['malware']['objects'],
+            techniques=mapped_objects['attack-pattern']['objects'],
+            tools=mapped_objects['tool']['objects'],
+            actions=mapped_objects['actions']['objects'],
+            data=mapped_objects['x-mitre-data-component']['objects'],
+            actors=mapped_objects['intrusion-set']['objects'],
+            relationships=mapped_objects['relationship']['objects']
+        )
     
