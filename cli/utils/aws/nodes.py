@@ -5,8 +5,8 @@ import botocore
 import boto3
 import json
 
-
-driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'attck'))
+# Example connection, replace this
+driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'examplepassshouldgohere'))
 client = boto3.client('lambda')
 
 class Node:
