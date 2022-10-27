@@ -1,12 +1,13 @@
 from pydantic import BaseModel, Field, root_validator, validator
 from datetime import datetime
 from neo4j import GraphDatabase
-import botocore
+import os
 import boto3
 import json
 
-# Example connection, replace this
-driver = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'examplepassshouldgohere'))
+# Example connection, replace this with your own settings (will be replaced with envs lator)
+driver = GraphDatabase.driver(os.getenv('NEO_URI','bolt://localhost:7687'),
+    auth=(os.getenv('NEO_USER', 'neo4j'), os.getenv('NEO_PASS')))
 client = boto3.client('lambda')
 
 class Node:

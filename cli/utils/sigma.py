@@ -1,5 +1,6 @@
 
 from .reternalapi import ReternalAPI
+from pydantic import BaseModel, Field
 import glob
 import yaml
 import asyncio
@@ -7,6 +8,16 @@ import copy
 import re
 
 TECHNIQUE_PATTERN = 't\d{4}(\.\d{3})?'
+
+
+
+class SigmaDetection(BaseModel):
+    external_id: str = Field(..., alias='id')
+    name: str = Field(..., alias='name')
+    description: str 
+    content: dict
+    platform: str = 'sentinel'
+    datasources: list[str]
 
 # Thanks fo Srisaila for this nested merge sample (https://stackoverflow.com/a/47564936)
 # this example doesn't override nested dictionaries, which is the default behaviour of the
